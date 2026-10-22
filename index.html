@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Act Readiness GRC MVP</title>
+<style>
+:root{--bg:#f4f6fa;--panel:#fff;--ink:#172033;--muted:#637087;--line:#dfe5ee;--accent:#3457d5;--soft:#eaf0ff;--danger:#b42318;--good:#067647}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#111a31;color:#fff;padding:22px max(20px,calc((100% - 1180px)/2));display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+header h1{font-size:21px;margin:0}header p{margin:4px 0 0;color:#c8d1e4;font-size:13px}
+button,select,input,textarea{font:inherit}button{border:0;border-radius:9px;padding:10px 14px;background:var(--accent);color:#fff;cursor:pointer;font-weight:650}button:hover{filter:brightness(.96)}button.secondary{background:#eef1f7;color:#27344d;border:1px solid var(--line)}button.danger{background:#fff0ef;color:var(--danger);border:1px solid #f3c4c0}button.small{padding:6px 9px;font-size:13px}
+.shell{max-width:1180px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns:220px 1fr;gap:22px}.sidebar,.panel,.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.sidebar{padding:12px;height:max-content;position:sticky;top:12px}.nav{display:block;width:100%;text-align:left;background:transparent;color:#34415a;margin:3px 0}.nav.active{background:var(--soft);color:var(--accent)}
+main{min-width:0}.page-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.page-title h2{margin:0;font-size:24px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.stat{padding:18px}.stat .number{font-size:30px;font-weight:750;margin-top:6px}.panel{padding:18px;margin-bottom:16px}.panel h3{margin:0 0 12px;font-size:17px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+label{display:block;font-size:13px;font-weight:650;margin:0 0 5px;color:#34415a}input,select,textarea{width:100%;padding:10px 11px;border:1px solid #cbd4e2;border-radius:8px;background:#fff;color:var(--ink)}textarea{min-height:85px;resize:vertical}.field{margin-bottom:12px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.table-wrap{overflow:auto}.badge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:12px;font-weight:700;background:#eef1f7;color:#45516a}.badge.high,.badge.crítico{background:#ffebe9;color:#b42318}.badge.medium,.badge.medio{background:#fff4d6;color:#8a5700}.badge.low,.badge.bajo{background:#e8f7ef;color:#067647}
+.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed #cbd4e2;border-radius:10px}.notice{background:#fff8e7;border:1px solid #f1d89a;padding:12px 14px;border-radius:10px;color:#694b00;font-size:13px;margin-bottom:16px}.success{color:var(--good)}.error{color:var(--danger)}.hidden{display:none!important}footer{max-width:1180px;padding:0 18px 28px;margin:auto;color:var(--muted);font-size:12px}
+@media(max-width:780px){.shell{grid-template-columns:1fr}.sidebar{position:static;display:flex;overflow:auto}.nav{width:auto;white-space:nowrap}.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.page-title h2{font-size:21px}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>AI Act Readiness <span style="color:#9db2ff">GRC MVP</span></h1><p id="subtitle">Prototipo para organizar evaluaciones iniciales y riesgos de gobernanza de IA</p></div>
+  <div class="row"><button class="secondary" id="langBtn">EN</button><button class="secondary" id="exportBtn">Exportar datos</button><button class="secondary" id="importBtn">Importar datos</button><input class="hidden" id="importFile" type="file" accept=".json,application/json"></div>
+</header>
+<div class="shell">
+<aside class="sidebar">
+  <button class="nav active" data-page="dashboard" data-i18n="navDashboard">Panel principal</button>
+  <button class="nav" data-page="projects" data-i18n="navProjects">Proyectos</button>
+  <button class="nav" data-page="assessment" data-i18n="navAssessment">Evaluación inicial</button>
+  <button class="nav" data-page="risks" data-i18n="navRisks">Registro de riesgos</button>
+  <button class="nav" data-page="about" data-i18n="navAbout">Acerca del MVP</button>
+</aside>
+<main>
+<section id="dashboard" class="page">
+ <div class="page-title"><h2 data-i18n="navDashboard">Panel principal</h2><button id="quickProject" data-i18n="newProject">+ Nuevo proyecto</button></div>
+ <div class="notice" data-i18n="disclaimerShort">Prototipo exploratorio: no certifica ni garantiza el cumplimiento del Reglamento de IA de la UE.</div>
+ <div class="grid">
+  <div class="stat"><div class="muted" data-i18n="totalProjects">Proyectos</div><div class="number" id="statProjects">0</div></div>
+  <div class="stat"><div class="muted" data-i18n="assessments">Evaluaciones completadas</div><div class="number" id="statAssessments">0</div></div>
+  <div class="stat"><div class="muted" data-i18n="openRisks">Riesgos registrados</div><div class="number" id="statRisks">0</div></div>
+ </div>
+ <div class="panel" style="margin-top:16px"><h3 data-i18n="recentProjects">Proyectos recientes</h3><div id="recentProjects"></div></div>
+ <div class="panel"><h3 data-i18n="priorityRisks">Riesgos de prioridad alta</h3><div id="priorityRisks"></div></div>
+</section>
+<section id="projects" class="page hidden">
+ <div class="page-title"><h2 data-i18n="navProjects">Proyectos</h2><button id="newProjectBtn" data-i18n="newProject">+ Nuevo proyecto</button></div>
+ <div class="panel"><div id="projectFormWrap" class="hidden">
+  <h3 id="projectFormTitle">Nuevo proyecto</h3>
+  <form id="projectForm"><input type="hidden" id="projectId">
+   <div class="formgrid"><div class="field"><label for="projectName" data-i18n="projectName">Nombre del proyecto *</label><input id="projectName" required maxlength="120"></div>
+   <div class="field"><label for="organization" data-i18n="organization">Organización</label><input id="organization" maxlength="120"></div></div>
+   <div class="formgrid"><div class="field"><label for="owner" data-i18n="owner">Responsable</label><input id="owner" maxlength="120"></div>
+   <div class="field"><label for="projectStatus" data-i18n="status">Estado</label><select id="projectStatus"><option value="Planning">Planificación</option><option value="In progress">En curso</option><option value="On hold">En pausa</option><option value="Completed">Completado</option></select></div></div>
+   <div class="field"><label for="projectDescription" data-i18n="description">Descripción / alcance</label><textarea id="projectDescription" maxlength="1500"></textarea></div>
+   <div class="row"><button type="submit" data-i18n="save">Guardar</button><button type="button" class="secondary" id="cancelProject" data-i18n="cancel">Cancelar</button></div>
+  </form><hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+ </div><div id="projectsTable"></div></div>
+</section>
+<section id="assessment" class="page hidden">
+ <div class="page-title"><h2 data-i18n="navAssessment">Evaluación inicial</h2></div>
+ <div class="notice" data-i18n="assessmentNotice">Evaluación orientativa autodeclarada. No determina por sí sola la clasificación jurídica ni el cumplimiento.</div>
+ <div class="panel"><form id="assessmentForm">
+  <div class="field"><label for="assessmentProject" data-i18n="linkedProject">Proyecto asociado *</label><select id="assessmentProject" required></select></div>
+  <div class="field"><label for="aiInventory" data-i18n="q1">¿Existe un inventario documentado de sistemas de IA?</label><select id="aiInventory"><option value="Not assessed">Sin evaluar</option><option value="Yes">Sí</option><option value="Partial">Parcial</option><option value="No">No</option><option value="N/A">No aplica / por determinar</option></select></div>
+  <div class="field"><label for="classification" data-i18n="q2">¿Se ha evaluado el propósito y la posible clasificación del sistema?</label><select id="classification"><option value="Not assessed">Sin evaluar</option><option value="Yes">Sí</option><option value="Partial">Parcial</option><option value="No">No</option><option value="N/A">No aplica / por determinar</option></select></div>
+  <div class="field"><label for="riskProcess" data-i18n="q3">¿Existe un proceso documentado de identificación y seguimiento de riesgos?</label><select id="riskProcess"><option value="Not assessed">Sin evaluar</option><option value="Yes">Sí</option><option value="Partial">Parcial</option><option value="No">No</option><option value="N/A">No aplica / por determinar</option></select></div>
+  <div class="field"><label for="evidence" data-i18n="q4">¿Se identifican responsables y evidencias para las medidas aplicables?</label><select id="evidence"><option value="Not assessed">Sin evaluar</option><option value="Yes">Sí</option><option value="Partial">Parcial</option><option value="No">No</option><option value="N/A">No aplica / por determinar</option></select></div>
+  <div class="field"><label for="assessmentNotes" data-i18n="notes">Notas y próximos pasos</label><textarea id="assessmentNotes" maxlength="3000"></textarea></div>
+  <button type="submit" data-i18n="saveAssessment">Guardar evaluación</button>
+ </form></div>
+ <div class="panel"><h3 data-i18n="savedAssessments">Evaluaciones guardadas</h3><div id="assessmentsTable"></div></div>
+</section>
+<section id="risks" class="page hidden">
+ <div class="page-title"><h2 data-i18n="navRisks">Registro de riesgos</h2><button id="newRiskBtn" data-i18n="newRisk">+ Nuevo riesgo</button></div>
+ <div class="panel"><div id="riskFormWrap" class="hidden">
+ <h3 data-i18n="newRisk">Nuevo riesgo</h3><form id="riskForm"><input type="hidden" id="riskId">
+ <div class="field"><label for="riskTitle" data-i18n="riskTitle">Riesgo *</label><input id="riskTitle" required maxlength="160"></div>
+ <div class="field"><label for="riskProject" data-i18n="linkedProject">Proyecto asociado *</label><select id="riskProject" required></select></div>
+ <div class="field"><label for="riskDescription" data-i18n="description">Descripción / alcance</label><textarea id="riskDescription" maxlength="1500"></textarea></div>
+ <div class="formgrid"><div class="field"><label for="riskLevel" data-i18n="level">Nivel</label><select id="riskLevel"><option value="High">Alto</option><option value="Medium" selected>Medio</option><option value="Low">Bajo</option></select></div>
+ <div class="field"><label for="riskStatus" data-i18n="status">Estado</label><select id="riskStatus"><option value="Open">Abierto</option><option value="Mitigating">En mitigación</option><option value="Accepted">Aceptado</option><option value="Closed">Cerrado</option></select></div></div>
+ <div class="formgrid"><div class="field"><label for="riskOwner" data-i18n="owner">Responsable</label><input id="riskOwner" maxlength="120"></div>
+ <div class="field"><label for="riskDue" data-i18n="dueDate">Fecha objetivo</label><input id="riskDue" type="date"></div></div>
+ <div class="row"><button type="submit" data-i18n="save">Guardar</button><button type="button" class="secondary" id="cancelRisk" data-i18n="cancel">Cancelar</button></div>
+ </form><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"></div><div id="risksTable"></div></div>
+</section>
+<section id="about" class="page hidden">
+ <div class="page-title"><h2 data-i18n="navAbout">Acerca del MVP</h2></div>
+ <div class="panel"><h3>AI Act Readiness GRC MVP</h3>
+ <p>Prototipo exploratorio para organizar proyectos, evaluaciones iniciales y riesgos relacionados con la gobernanza de sistemas de inteligencia artificial.</p>
+ <p><strong>Limitaciones:</strong> no es una herramienta oficial de la UE, no ofrece asesoramiento jurídico, no certifica conformidad y no determina de forma automática la clasificación legal de un sistema de IA.</p>
+ <p>Referencia normativa: Reglamento (UE) 2024/1689. Consulta siempre el texto legal y las orientaciones oficiales vigentes.</p>
+ <p><a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj" target="_blank" rel="noopener">Texto oficial en EUR-Lex</a> · <a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noopener">Marco regulatorio de la Comisión Europea</a></p>
+ <p class="muted">Los datos se guardan en el almacenamiento local del navegador. No introduzcas información personal, confidencial o sensible. Exporta copias de respaldo.</p>
+ </div>
+</section>
+</main>
+</div>
+<footer>AI Act Readiness GRC MVP · Prototipo exploratorio · Guarda copias de respaldo de tus datos.</footer>
+<script>
+(function(){
+"use strict";
+const STORAGE_KEY="aiActReadinessGrcMvp.v1";
+const initial={projects:[],assessments:[],risks:[]};
+let data=loadData(), lang="es";
+const $=id=>document.getElementById(id);
+const dict={
+es:{subtitle:"Prototipo para organizar evaluaciones iniciales y riesgos de gobernanza de IA",navDashboard:"Panel principal",navProjects:"Proyectos",navAssessment:"Evaluación inicial",navRisks:"Registro de riesgos",navAbout:"Acerca del MVP",newProject:"+ Nuevo proyecto",disclaimerShort:"Prototipo exploratorio: no certifica ni garantiza el cumplimiento del Reglamento de IA de la UE.",totalProjects:"Proyectos",assessments:"Evaluaciones guardadas",openRisks:"Riesgos registrados",recentProjects:"Proyectos recientes",priorityRisks:"Riesgos de prioridad alta",projectName:"Nombre del proyecto *",organization:"Organización",owner:"Responsable",status:"Estado",description:"Descripción / alcance",save:"Guardar",cancel:"Cancelar",linkedProject:"Proyecto asociado *",q1:"¿Existe un inventario documentado de sistemas de IA?",q2:"¿Se ha evaluado el propósito y la posible clasificación del sistema?",q3:"¿Existe un proceso documentado de identificación y seguimiento de riesgos?",q4:"¿Se identifican responsables y evidencias para las medidas aplicables?",notes:"Notas y próximos pasos",saveAssessment:"Guardar evaluación",savedAssessments:"Evaluaciones guardadas",assessmentNotice:"Evaluación orientativa autodeclarada. No determina por sí sola la clasificación jurídica ni el cumplimiento.",newRisk:"+ Nuevo riesgo",riskTitle:"Riesgo *",level:"Nivel",dueDate:"Fecha objetivo",export:"Exportar datos",import:"Importar datos",emptyProjects:"Aún no hay proyectos. Crea el primero para empezar.",emptyRisks:"No hay riesgos registrados.",emptyAssessments:"No hay evaluaciones guardadas.",noProject:"Primero crea un proyecto.",actions:"Acciones",edit:"Editar",delete:"Eliminar",confirmDelete:"¿Seguro que quieres eliminar este elemento?",project:"Proyecto",created:"Creado",risk:"Riesgo",assessment:"Evaluación",updated:"Datos actualizados.",importOk:"Datos importados correctamente.",badFile:"No se pudo importar el archivo. Comprueba que sea un JSON exportado por esta aplicación.",needProject:"Crea un proyecto antes de guardar una evaluación o un riesgo.",saved:"Guardado correctamente.",statusLabel:"Estado",riskLevel:"Nivel",exported:"Copia exportada.",name:"Nombre",date:"Fecha",noOwner:"Sin asignar",completed:"Completado",progress:"En curso",planning:"Planificación",onhold:"En pausa",open:"Abierto",mitigating:"En mitigación",accepted:"Aceptado",closed:"Cerrado",high:"Alto",medium:"Medio",low:"Bajo",answers:"Respuestas",notassessed:"Sin evaluar",yes:"Sí",partial:"Parcial",no:"No",na:"No aplica / por determinar"},
+en:{subtitle:"Prototype to organize initial assessments and AI governance risks",navDashboard:"Dashboard",navProjects:"Projects",navAssessment:"Initial assessment",navRisks:"Risk register",navAbout:"About the MVP",newProject:"+ New project",disclaimerShort:"Exploratory prototype: it does not certify or guarantee compliance with the EU AI Act.",totalProjects:"Projects",assessments:"Saved assessments",openRisks:"Recorded risks",recentProjects:"Recent projects",priorityRisks:"High-priority risks",projectName:"Project name *",organization:"Organization",owner:"Owner",status:"Status",description:"Description / scope",save:"Save",cancel:"Cancel",linkedProject:"Linked project *",q1:"Is there a documented inventory of AI systems?",q2:"Have the system's purpose and possible classification been assessed?",q3:"Is there a documented process for identifying and tracking risks?",q4:"Are owners and evidence identified for applicable measures?",notes:"Notes and next steps",saveAssessment:"Save assessment",savedAssessments:"Saved assessments",assessmentNotice:"Indicative self-assessment. It does not by itself determine legal classification or compliance.",newRisk:"+ New risk",riskTitle:"Risk *",level:"Level",dueDate:"Target date",export:"Export data",import:"Import data",emptyProjects:"No projects yet. Create your first project to get started.",emptyRisks:"No risks recorded.",emptyAssessments:"No saved assessments.",actions:"Actions",edit:"Edit",delete:"Delete",confirmDelete:"Are you sure you want to delete this item?",project:"Project",created:"Created",risk:"Risk",assessment:"Assessment",updated:"Data updated.",importOk:"Data imported successfully.",badFile:"Could not import the file. Check that it is a JSON export from this app.",needProject:"Create a project before saving an assessment or risk.",saved:"Saved successfully.",statusLabel:"Status",riskLevel:"Level",exported:"Backup exported.",name:"Name",date:"Date",noOwner:"Unassigned",completed:"Completed",progress:"In progress",planning:"Planning",onhold:"On hold",open:"Open",mitigating:"Mitigating",accepted:"Accepted",closed:"Closed",high:"High",medium:"Medium",low:"Low",answers:"Answers",notassessed:"Not assessed",yes:"Yes",partial:"Partial",no:"No",na:"N/A / to be determined"}
+};
+function t(k){return (dict[lang]&&dict[lang][k])||dict.es[k]||k}
+function uid(){return "id-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8)}
+function loadData(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.projects)&&Array.isArray(x.assessments)&&Array.isArray(x.risks))return x}}catch(e){console.warn("Local storage unavailable",e)}return structuredClone(initial)}
+function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));return true}catch(e){alert("No se pudieron guardar los datos en el almacenamiento local. Exporta una copia de respaldo.");return false}}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function dateNow(){return new Date().toISOString().slice(0,10)}
+function projectName(id){return data.projects.find(p=>p.id===id)?.name||"—"}
+function badge(value){let cls=String(value).toLowerCase();return '<span class="badge '+esc(cls)+'">'+esc(displayValue(value))+'</span>'}
+function displayValue(v){const map={High:"high",Medium:"medium",Low:"low",Open:"open",Mitigating:"mitigating",Accepted:"accepted",Closed:"closed",Planning:"planning","In progress":"progress","On hold":"onhold",Completed:"completed","Not assessed":"notassessed",Yes:"yes",Partial:"partial",No:"no","N/A":"na"};return t(map[v]||v)}
+function go(page){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("hidden",x.id!==page));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===page));render()}
+function empty(msg){return '<div class="empty">'+esc(msg)+'</div>'}
+function render(){
+$("statProjects").textContent=data.projects.length;$("statAssessments").textContent=data.assessments.length;$("statRisks").textContent=data.risks.length;
+$("recentProjects").innerHTML=data.projects.length?'<div class="table-wrap"><table><thead><tr><th>'+t("name")+'</th><th>'+t("statusLabel")+'</th><th>'+t("created")+'</th></tr></thead><tbody>'+data.projects.slice().sort((a,b)=>b.created.localeCompare(a.created)).slice(0,5).map(p=>'<tr><td><strong>'+esc(p.name)+'</strong><div class="muted">'+esc(p.organization||"")+'</div></td><td>'+badge(p.status)+'</td><td>'+esc(p.created)+'</td></tr>').join("")+'</tbody></table></div>':empty(t("emptyProjects"));
+const high=data.risks.filter(r=>r.level==="High"&&r.status!=="Closed");
+$("priorityRisks").innerHTML=high.length?'<div class="table-wrap"><table><thead><tr><th>'+t("risk")+'</th><th>'+t("project")+'</th><th>'+t("statusLabel")+'</th></tr></thead><tbody>'+high.map(r=>'<tr><td>'+esc(r.title)+'</td><td>'+esc(projectName(r.projectId))+'</td><td>'+badge(r.status)+'</td></tr>').join("")+'</tbody></table></div>':empty(t("emptyRisks"));
+$("projectsTable").innerHTML=data.projects.length?'<div class="table-wrap"><table><thead><tr><th>'+t("name")+'</th><th>'+t("statusLabel")+'</th><th>'+t("owner")+'</th><th>'+t("actions")+'</th></tr></thead><tbody>'+data.projects.map(p=>'<tr><td><strong>'+esc(p.name)+'</strong><div class="muted">'+esc(p.organization||"")+'</div><div class="muted">'+esc(p.description||"")+'</div></td><td>'+badge(p.status)+'</td><td>'+esc(p.owner||t("noOwner"))+'</td><td><div class="row"><button class="small secondary" data-edit-project="'+p.id+'">'+t("edit")+'</button><button class="small danger" data-delete-project="'+p.id+'">'+t("delete")+'</button></div></td></tr>').join("")+'</tbody></table></div>':empty(t("emptyProjects"));
+const opts='<option value="">—</option>'+data.projects.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+["assessmentProject","riskProject"].forEach(id=>{const old=$(id).value;$(id).innerHTML=opts;if(data.projects.some(p=>p.id===old))$(id).value=old});
+$("assessmentsTable").innerHTML=data.assessments.length?'<div class="table-wrap"><table><thead><tr><th>'+t("project")+'</th><th>'+t("date")+'</th><th>'+t("answers")+'</th></tr></thead><tbody>'+data.assessments.slice().reverse().map(a=>'<tr><td>'+esc(projectName(a.projectId))+'</td><td>'+esc(a.date)+'</td><td>'+["aiInventory","classification","riskProcess","evidence"].map(k=>badge(a[k])).join(" ")+'</td></tr>').join("")+'</tbody></table></div>':empty(t("emptyAssessments"));
+$("risksTable").innerHTML=data.risks.length?'<div class="table-wrap"><table><thead><tr><th>'+t("risk")+'</th><th>'+t("project")+'</th><th>'+t("level")+'</th><th>'+t("statusLabel")+'</th><th>'+t("owner")+'</th><th>'+t("actions")+'</th></tr></thead><tbody>'+data.risks.map(r=>'<tr><td><strong>'+esc(r.title)+'</strong><div class="muted">'+esc(r.description||"")+'</div><div class="muted">'+(r.due?esc(t("dueDate")+": "+r.due):"")+'</div></td><td>'+esc(projectName(r.projectId))+'</td><td>'+badge(r.level)+'</td><td>'+badge(r.status)+'</td><td>'+esc(r.owner||t("noOwner"))+'</td><td><div class="row"><button class="small secondary" data-edit-risk="'+r.id+'">'+t("edit")+'</button><button class="small danger" data-delete-risk="'+r.id+'">'+t("delete")+'</button></div></td></tr>').join("")+'</tbody></table></div>':empty(t("emptyRisks"));
+}
+function clearProjectForm(){$("projectForm").reset();$("projectId").value="";$("projectFormWrap").classList.add("hidden")}
+function showProjectForm(p){$("projectFormWrap").classList.remove("hidden");$("projectFormTitle").textContent=p?t("edit")+" "+t("project"):t("newProject");$("projectId").value=p?.id||"";$("projectName").value=p?.name||"";$("organization").value=p?.organization||"";$("owner").value=p?.owner||"";$("projectStatus").value=p?.status||"Planning";$("projectDescription").value=p?.description||"";$("projectName").focus()}
+function clearRiskForm(){$("riskForm").reset();$("riskId").value="";$("riskLevel").value="Medium";$("riskStatus").value="Open";$("riskFormWrap").classList.add("hidden")}
+function showRiskForm(r){if(!data.projects.length){alert(t("needProject"));go("projects");showProjectForm();return}$("riskFormWrap").classList.remove("hidden");$("riskId").value=r?.id||"";$("riskTitle").value=r?.title||"";$("riskProject").value=r?.projectId||data.projects[0].id;$("riskDescription").value=r?.description||"";$("riskLevel").value=r?.level||"Medium";$("riskStatus").value=r?.status||"Open";$("riskOwner").value=r?.owner||"";$("riskDue").value=r?.due||"";$("riskTitle").focus()}
+function translate(){document.documentElement.lang=lang;document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.dataset.i18n;if(dict[lang][k])el.textContent=dict[lang][k]});$("subtitle").textContent=t("subtitle");$("exportBtn").textContent=t("export");$("importBtn").textContent=t("import");$("langBtn").textContent=lang==="es"?"EN":"ES";render()}
+document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
+$("langBtn").addEventListener("click",()=>{lang=lang==="es"?"en":"es";translate()});
+$("quickProject").addEventListener("click",()=>{go("projects");showProjectForm()});$("newProjectBtn").addEventListener("click",()=>showProjectForm());$("cancelProject").addEventListener("click",clearProjectForm);
+$("projectForm").addEventListener("submit",e=>{e.preventDefault();const id=$("projectId").value;const old=data.projects.find(p=>p.id===id);const p={id:id||uid(),name:$("projectName").value.trim(),organization:$("organization").value.trim(),owner:$("owner").value.trim(),status:$("projectStatus").value,description:$("projectDescription").value.trim(),created:old?.created||dateNow(),updated:dateNow()};if(!p.name)return;if(old)data.projects=data.projects.map(x=>x.id===id?p:x);else data.projects.push(p);saveData();clearProjectForm();render();alert(t("saved"))});
+$("projectsTable").addEventListener("click",e=>{const eb=e.target.closest("[data-edit-project]"),db=e.target.closest("[data-delete-project]");if(eb){showProjectForm(data.projects.find(p=>p.id===eb.dataset.editProject));return}if(db&&confirm(t("confirmDelete"))){const id=db.dataset.deleteProject;data.projects=data.projects.filter(p=>p.id!==id);data.assessments=data.assessments.filter(a=>a.projectId!==id);data.risks=data.risks.filter(r=>r.projectId!==id);saveData();render()}});
+$("assessmentForm").addEventListener("submit",e=>{e.preventDefault();if(!data.projects.length){alert(t("needProject"));return}if(!$("assessmentProject").value){alert(t("needProject"));return}data.assessments.push({id:uid(),projectId:$("assessmentProject").value,date:dateNow(),aiInventory:$("aiInventory").value,classification:$("classification").value,riskProcess:$("riskProcess").value,evidence:$("evidence").value,notes:$("assessmentNotes").value.trim()});saveData();render();alert(t("saved"))});
+$("newRiskBtn").addEventListener("click",()=>showRiskForm());$("cancelRisk").addEventListener("click",clearRiskForm);
+$("riskForm").addEventListener("submit",e=>{e.preventDefault();const id=$("riskId").value;const r={id:id||uid(),title:$("riskTitle").value.trim(),projectId:$("riskProject").value,description:$("riskDescription").value.trim(),level:$("riskLevel").value,status:$("riskStatus").value,owner:$("riskOwner").value.trim(),due:$("riskDue").value,created:data.risks.find(x=>x.id===id)?.created||dateNow()};if(!r.projectId){alert(t("needProject"));return}if(id)data.risks=data.risks.map(x=>x.id===id?r:x);else data.risks.push(r);saveData();clearRiskForm();render();alert(t("saved"))});
+$("risksTable").addEventListener("click",e=>{const eb=e.target.closest("[data-edit-risk]"),db=e.target.closest("[data-delete-risk]");if(eb){showRiskForm(data.risks.find(r=>r.id===eb.dataset.editRisk));return}if(db&&confirm(t("confirmDelete"))){data.risks=data.risks.filter(r=>r.id!==db.dataset.deleteRisk);saveData();render()}});
+$("exportBtn").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({app:"AI Act Readiness GRC MVP",version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="ai-act-readiness-backup-"+dateNow()+".json";a.click();URL.revokeObjectURL(url)});
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());const d=obj.data||obj;if(!Array.isArray(d.projects)||!Array.isArray(d.assessments)||!Array.isArray(d.risks))throw Error("schema");if(!confirm("Importar sustituirá los datos actuales. ¿Continuar?"))return;data={projects:d.projects,assessments:d.assessments,risks:d.risks};saveData();render();alert(t("importOk"))}catch(err){alert(t("badFile"))}finally{e.target.value=""}});
+translate();go("dashboard");
+})();
+</script>
+</body>
+</html>
